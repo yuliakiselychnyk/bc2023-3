@@ -1,59 +1,28 @@
-const fs = require('fs');
+const fs = require("node:fs");
 
-// Функція для зчитування JSON-даних з файлу
-function readJSONFile(filename, callback) {
-  fs.readFile(filename, 'utf8', (err, data) => {
-    if (err) {
-      return callback(err, null);
-    }
-
-    try {
-      const jsonData = JSON.parse(data);
-      callback(null, jsonData);
-    } catch (error) {
-      callback(error, null);
-    }
-  });
-}
-
-// Функція для пошуку активу з найменшим значенням
-function findMinAsset(data) {
-  let minAsset = null;
-  let minValue = Infinity;
-
-  for (const entry of data) {
-    const value = entry.value;
-    if (value < minValue) {
-      minValue = value;
-      minAsset = entry.txt;
+function minvalue(jsonData) {
+  let min = 10000;
+  let text = "";
+  for (let list of jsonData) {
+    if (list.value < min) {
+      min = list.value;
+      text = list.txt;
     }
   }
-
-  return { asset: minAsset, value: minValue };
+  return `${text}:${min}`;
 }
 
-readJSONFile('data.json', (err, jsonData) => {
-  if (err) {
-    console.error('Помилка читання файлу:', err);
-    return;
-  }
-
-  const { asset, value } = findMinAsset(jsonData);
-
-  if (asset) {
-    // Виводимо результат
-    const output = `${asset}:${value}`;
-    console.log(output);
-
-    // Зберігаємо результат у файл 'output.txt'
-    fs.writeFile('output.txt', output, (err) => {
-      if (err) {
-        console.error('Помилка збереження результату:', err);
+fs.readFile("data.json", (err, data) => {
+  if (err === null) {
+    const jsonData = JSON.parse(data);
+    const str = minvalue(jsonData);
+    fs.writeFile("output.txt", str, (err) => {
+      if (err === null) {
       } else {
-        console.log('Результат збережено у файлі output.txt');
+        console.log(err);
       }
     });
   } else {
-    console.log('Не знайдено жодного активу');
+    console.log(err);
   }
 });
